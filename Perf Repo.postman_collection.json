@@ -1,0 +1,291 @@
+{
+	"info": {
+		"_postman_id": "3587089d-4702-442c-8a3e-a747a2891405",
+		"name": "Perf Repo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST to get JWT for client to create clients",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d7e87b79-e999-44e9-bbb8-8614f7cd4735",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Bearer token for client to create clients returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Bearer\");",
+							"});",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"bearer_token\", \"Bearer \" + jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0bce7711-7952-48dc-bdf6-d648b92b016c",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "{{G_policebox_client_admin_id}}",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{G_policebox_client_admin_secret}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "urn:rx:digital:openid:client:write",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{G_policebox_host}}/secure/connect/token",
+					"host": [
+						"{{G_policebox_host}}"
+					],
+					"path": [
+						"secure",
+						"connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Regbox V2 client to write/read registrations",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "03fc7de4-944d-472d-bff0-a5b34361b752",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a8c7173f-ceda-4c0f-a427-b5584df5eb89",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"var jsonId = JSON.parse(responseBody);",
+							"pm.environment.set(\"autotest_client_id\", jsonId.client_id);",
+							"var jsonSecret = JSON.parse(responseBody);",
+							"pm.environment.set(\"autotest_client_secret\", jsonSecret.client_secret);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{bearer_token}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"scope\": \"urn:rx:gbs:api:registrations:write urn:rx:gbs:api:registrations:read urn:rx:gbs:api:profile:write urn:rx:gbs:api:privacy:write\",\n  \"client_name\": \"policeboxAutotestClientForRegboxV2\",\n  \"claims\": [\n    {\n      \"type\": \"rxEe\",\n      \"value\": \"*\"\n    },\n    {\n      \"type\": \"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name\",\n      \"value\": \"REFUser\"\n    }\n  ],\n  \"access_token_lifetime\": 300\n}"
+				},
+				"url": {
+					"raw": "{{G_policebox_host}}/connect/clients",
+					"host": [
+						"{{G_policebox_host}}"
+					],
+					"path": [
+						"connect",
+						"clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST to get JWT for created client",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "961d9dd3-c1c6-4547-8a3b-01067f757091",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Bearer token for reg client returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Bearer\");",
+							"});",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.environment.set(\"bearer_token_reg\", \"Bearer \" + jsonData.access_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Cache-Control",
+						"value": "no-cache"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "client_id",
+							"value": "{{autotest_client_id}}",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{autotest_client_secret}}",
+							"type": "text"
+						},
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "urn:rx:gbs:api:registrations:write urn:rx:gbs:api:registrations:read urn:rx:gbs:api:profile:write urn:rx:gbs:api:privacy:write",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{G_policebox_host}}/secure/connect/token",
+					"host": [
+						"{{G_policebox_host}}"
+					],
+					"path": [
+						"secure",
+						"connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST registration to Regbox V2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d9b385be-900b-400d-ac8c-0571c5073738",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"warning": "This is a duplicate header and will be overridden by the Authorization header generated by Postman.",
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{bearer_token_reg}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"eventEditionGbsCode\": \"LBFGD17\",\r\n  \"eventEditionAtlasCode\": \"eve-73409693-e00d-471c-95c6-bf269897c852\",\r\n  \"locale\": \"en\",\r\n  \"person\": {\r\n    \"firstName\": \"Richard\",\r\n    \"lastName\": \"Osborne\",\r\n    \"email\": \"richard.osborne@reedexpo.co.uk\"\r\n  },\r\n  \"organisation\": {\r\n\t\t\"name\": \"${correlationId()}\",\r\n\t\t\"address\" : {\r\n\t\t\"addressLine1\": \"${correlationId()}\",\r\n\t\t\"addressLine2\": \"${correlationId()}\",\r\n\t\t\"city\": \"${correlationId()}\",\r\n\t\t\"countryIsoCode\": \"GBR\"\r\n\t}\r\n  },\r\n  \"privacyresponses\": [\r\n    {\r\n      \"channelSettings\": {\r\n        \"email\": \"in\",\r\n        \"mail\": \"in\",\r\n        \"phone\": \"in\",\r\n        \"sms\": \"in\"\r\n      },\r\n      \"level\": \"bu\",\r\n      \"levelId\": \"OBU_017\"\r\n    },\r\n    {\r\n      \"channelSettings\": {\r\n        \"email\": \"out\",\r\n        \"mail\": \"out\",\r\n        \"phone\": \"out\",\r\n        \"sms\": \"out\",\r\n        \"thirdParty\": \"in\"\r\n      },\r\n      \"level\": \"event\",\r\n      \"levelId\": \"LBF\"\r\n    }\r\n  ],\r\n  \"profileResponses\": [\r\n\t    {\r\n\t\t\t\"id\": \"1\"\r\n\t\t}\r\n\t],\r\n  \"registrationDate\": \"2018-07-04T09:52:09.8116081Z\",\r\n  \"gbsEnabled\": true\r\n}"
+				},
+				"url": {
+					"raw": "{{E_regbox_host}}/api/v2/registrations",
+					"host": [
+						"{{E_regbox_host}}"
+					],
+					"path": [
+						"api",
+						"v2",
+						"registrations"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
